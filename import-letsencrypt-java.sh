@@ -9,18 +9,20 @@ if [[ -z ${JAVA_HOME+x} ]] || [[ ! -d ${JAVA_HOME} ]]; then
     JAVA_HOME=${1}
 fi
 
-KEYSTORE="$JAVA_HOME/jre/lib/security/cacerts"
-if [ ! -f "$KEYSTORE" ]; then
-    KEYSTORE=$(find / -type f -name "cacerts" 2>/dev/null | head -n 1)
+# Make sure the keytool is on our path
+PATH=${PATH}:${JAVA_HOME}/jre/bin/
+
+for KEYSTORE in $(find / -type f -name cacerts 2>/dev/null)
+
+do
+
     if [ ! -f "$KEYSTORE" ]; then
         echo "Keystore not found in '$KEYSTORE'"
         exit 1
     fi
-fi
+    
 cp "$KEYSTORE" "$KEYSTORE.$(date +"%Y-%m-%dT%H:%m:%S")"
 
-# Make sure the keytool is on our path
-PATH=${PATH}:${JAVA_HOME}/jre/bin/
 
 # List of downloads updated based on information found at
 # https://letsencrypt.org/certificates/ (Last updated 2021-08-17)
@@ -62,3 +64,5 @@ do
 done
 
 rm -vf ./*.${CERT_EXT}*
+
+done
